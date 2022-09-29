@@ -64,7 +64,7 @@ class AuthenticationFragment: Fragment() {
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
         startActivityForResult(
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
+            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).setIsSmartLockEnabled(false)
                 .build(), SIGN_IN_RESULT_CODE
         )
 
