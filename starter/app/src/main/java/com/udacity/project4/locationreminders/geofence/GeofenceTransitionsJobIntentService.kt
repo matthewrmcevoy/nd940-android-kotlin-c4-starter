@@ -28,6 +28,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
         //        TODO: call this to start the JobIntentService to handle the geofencing transition events
         fun enqueueWork(context: Context, intent: Intent) {
             Log.i("geoFenceJobIntServ","enqueueWork properly called")
+            Log.i("geofenceJobIntServ", intent.action!!)
             enqueueWork(
                 context,
                 GeofenceTransitionsJobIntentService::class.java, JOB_ID,
