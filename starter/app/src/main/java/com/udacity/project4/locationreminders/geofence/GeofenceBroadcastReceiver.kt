@@ -26,9 +26,10 @@ import com.udacity.project4.utils.sendNotification
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        Log.i("GeoBroadcastRec","onReceive called ->")
 
-//TODO: implement the onReceive method to receive the geofencing events at the background
         if(intent.action == ACTION_GEOFENCE_EVENT){
+            Log.i("GeoBroadcastRec","Action = GEOFENCE_EVENT NOW CALLING enqueueWork")
            GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
         }
 

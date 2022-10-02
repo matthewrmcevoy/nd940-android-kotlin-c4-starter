@@ -78,6 +78,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         if(map.isMyLocationEnabled){
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (location != null) {
+                Log.i("SaveLocFrag","LastLocation found +${location.time}")
                 curLat = location.latitude
                 curLong = location.longitude
                 val curLoc = LatLng(curLat, curLong)

@@ -27,6 +27,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
 
         //        TODO: call this to start the JobIntentService to handle the geofencing transition events
         fun enqueueWork(context: Context, intent: Intent) {
+            Log.i("geoFenceJobIntServ","enqueueWork properly called")
             enqueueWork(
                 context,
                 GeofenceTransitionsJobIntentService::class.java, JOB_ID,
@@ -36,22 +37,25 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     }
 
     override fun onHandleWork(intent: Intent) {
+        Log.i("geoFenceJobIntServ","onHandleWork properly called")
         //TODO: handle the geofencing transition events and
         // send a notification to the user when he enters the geofence area
         //TODO call @sendNotification
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
-
+        Log.i("geoFenceJobIntServ","checking GeofencingEvent.fromIntent $geofencingEvent")
         if(geofencingEvent.hasError()){
             Log.i("geoFenceJobIntServ","${geofencingEvent.errorCode}")
         }
+        Log.i("geoFenceJobIntServ","geofenceTransition is ${geofencingEvent.geofenceTransition}")
         if(geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER){
+            Log.i("geoFenceJobIntServ", "geofence entered. Let's send some notifications")
             sendNotification(geofencingEvent.triggeringGeofences)
         }
     }
 
     //TODO: get the request id of the current geofence
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        var requestId = ""
+    Log.i("geoFenceJobIntServ","sendNotification called")
 
         //Get the local repository instance
         val remindersLocalRepository: ReminderDataSource by inject()
@@ -59,7 +63,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
         CoroutineScope(coroutineContext).launch(SupervisorJob()) {
             //get the reminder with the request id
             for (Geofence in triggeringGeofences) {
-                requestId = Geofence.requestId
+               val requestId = Geofence.requestId
                 val result = remindersLocalRepository.getReminder(requestId)
                 if (result is Result.Success<ReminderDTO>) {
                     val reminderDTO = result.data

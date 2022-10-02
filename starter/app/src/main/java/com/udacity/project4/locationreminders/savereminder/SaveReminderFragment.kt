@@ -31,6 +31,7 @@ const val ACTION_GEOFENCE_EVENT = "GEOFENCE_EVENT"
 private const val REQUEST_FOREGROUND_ONLY = 123
 private const val REQUEST_FOREBACK_PERM = 321
 private const val REQUEST_LOCATION_ON = 55
+const val GEOFENCE_RANGE = 300f
 
 class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
@@ -44,7 +45,7 @@ class SaveReminderFragment : BaseFragment() {
     private val geofencePendingIntent: PendingIntent by lazy{
         val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
-        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     override fun onCreateView(
@@ -160,11 +161,9 @@ class SaveReminderFragment : BaseFragment() {
     private fun addNewGeofence(){
         if(::newGeofenceReminder.isInitialized){
             if(_viewModel.validateEnteredData(newGeofenceReminder)){
-                _viewModel.validateAndSaveReminder(newGeofenceReminder)
-                val GEOFENCE_RADIUS = 100f
                 val geofence = Geofence.Builder()
                     .setRequestId(newGeofenceReminder.id)
-                    .setCircularRegion(newGeofenceReminder.latitude!!,newGeofenceReminder.longitude!!,GEOFENCE_RADIUS)
+                    .setCircularRegion(newGeofenceReminder.latitude!!,newGeofenceReminder.longitude!!,GEOFENCE_RANGE)
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                     .build()
@@ -192,8 +191,9 @@ class SaveReminderFragment : BaseFragment() {
                         }
                     }
                 }
+                _viewModel.validateAndSaveReminder(newGeofenceReminder)
                 _viewModel.onClear()
-                _viewModel.navigationCommand.value=NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
+                //_viewModel.navigationCommand.value=NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
             }
         }
     }
