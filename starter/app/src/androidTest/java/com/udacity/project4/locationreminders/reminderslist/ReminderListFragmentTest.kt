@@ -123,8 +123,6 @@ class ReminderListFragmentTest {
         launchFragmentInContainer<ReminderListFragment>(Bundle(),R.style.AppTheme)
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
     }
-
-//    TODO: add testing for the error messages.
     //all error handling tests are completed in RemindersActivityTest
 
 }

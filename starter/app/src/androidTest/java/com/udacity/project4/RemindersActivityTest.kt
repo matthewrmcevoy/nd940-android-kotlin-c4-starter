@@ -80,8 +80,6 @@ class RemindersActivityTest :
     }
 
 
-//    TODO: add End to End testing to the app
-
     @Test
     fun noReminders_ShowsNoDataImage() = runBlocking{
         repository.deleteAllReminders()

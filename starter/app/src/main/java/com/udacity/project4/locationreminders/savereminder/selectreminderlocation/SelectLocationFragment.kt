@@ -57,7 +57,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-//        TODO: add style to the map
+
         binding.saveLocBttn.setOnClickListener {
             onLocationSelected()
         }
@@ -69,11 +69,30 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         return binding.root
     }
 
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(),
+                    R.raw.map_style
+                )
+            )
+            if(!success){
+                Log.i("SelLocFrag","Style parsing Failed")
+            }
+        }catch(e: Resources.NotFoundException){
+            Log.i("SelLocFrag","Style not found. Error:", e)
+        }
+    }
+
     override fun onMapReady(googleMap: GoogleMap){
         map= googleMap
         var curLat = 0.00
         var curLong = 0.00
         val mapZoomLvl = 16f
+        setMapStyle(map)
         enableMyLocation()
         if(map.isMyLocationEnabled){
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
