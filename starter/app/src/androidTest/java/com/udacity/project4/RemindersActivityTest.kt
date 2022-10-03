@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -19,8 +20,10 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
+import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,7 +81,17 @@ class RemindersActivityTest :
             repository.deleteAllReminders()
         }
     }
+    @Before
+    fun registerIdlingResource(){
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+    }
+    @After
+    fun unregisterIdlingResource(){
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
 
+    }
 
     @Test
     fun noReminders_ShowsNoDataImage() = runBlocking{
@@ -118,7 +131,6 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderTitle)).perform(replaceText("Test1"))
         onView(withId(R.id.reminderDescription)).perform(replaceText("Desc1"))
         onView(withId(R.id.saveReminder)).perform(click())
-        delay(2000)
         onView(withText(R.string.err_select_location)).check(matches(isDisplayed()))
 
 
@@ -134,12 +146,12 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderTitle)).perform(replaceText("Test1"))
         onView(withId(R.id.reminderDescription)).perform(replaceText("Desc1"))
         onView(withId(R.id.selectLocation)).perform(click())
-        delay(2000)
+        delay(6000)
         onView(withId(R.id.map)).perform(click())
-        delay(2000)
+
         onView(withId(R.id.save_loc_bttn)).perform(click())
         onView(withId(R.id.saveReminder)).perform(click())
-        delay(2000)
+
         onView(withText("Test1")).check(matches(isDisplayed()))
         activityScenario.close()
 
