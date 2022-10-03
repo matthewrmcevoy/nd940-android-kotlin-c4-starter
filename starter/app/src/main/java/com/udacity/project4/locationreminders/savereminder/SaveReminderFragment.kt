@@ -130,7 +130,7 @@ class SaveReminderFragment : BaseFragment() {
 
     private fun checkLocationSettingsStartGeofence(resolve: Boolean = true){
         val locationRequest = LocationRequest.create().apply{
-            priority = LocationRequest.PRIORITY_LOW_POWER
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val settingsClient = LocationServices.getSettingsClient(requireContext())
