@@ -143,16 +143,16 @@ class RemindersActivityTest :
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
         onView(withId(R.id.addReminderFAB)).perform(click())
-        onView(withId(R.id.reminderTitle)).perform(replaceText("Test1"))
-        onView(withId(R.id.reminderDescription)).perform(replaceText("Desc1"))
+        onView(withId(R.id.reminderTitle)).perform(replaceText("Test3"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("Desc3"))
         onView(withId(R.id.selectLocation)).perform(click())
-        delay(6000)
+        delay(3000)
         onView(withId(R.id.map)).perform(click())
 
         onView(withId(R.id.save_loc_bttn)).perform(click())
         onView(withId(R.id.saveReminder)).perform(click())
 
-        onView(withText("Test1")).check(matches(isDisplayed()))
+        onView(withText("Test3")).check(matches(isDisplayed()))
         activityScenario.close()
 
     }

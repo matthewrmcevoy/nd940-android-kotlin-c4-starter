@@ -12,8 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.map
+import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentAuthBinding
@@ -59,16 +61,28 @@ class AuthenticationFragment: Fragment() {
     }
 
     private fun login(){
+        val custLayout = AuthMethodPickerLayout
+            .Builder(R.layout.custom_auth_layout)
+            .setEmailButtonId(R.id.email_login_button)
+            .setGoogleButtonId(R.id.google_login_bttn)
+            .build()
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
         startActivityForResult(
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).setIsSmartLockEnabled(false)
+            AuthUI.getInstance().createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                //.setAuthMethodPickerLayout(custLayout)
+                .setLogo(R.drawable.map)
+                .setIsSmartLockEnabled(false)
                 .build(), SIGN_IN_RESULT_CODE
         )
 
     }
+
+
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SIGN_IN_RESULT_CODE) {
