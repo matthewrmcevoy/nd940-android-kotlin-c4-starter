@@ -25,38 +25,74 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 //Medium Test to test the repository
 @MediumTest
-class RemindersLocalRepositoryTest(remindersDao: RemindersDao, ioDispatcher: CoroutineDispatcher = Dispatchers.IO): RemindersLocalRepository(remindersDao, ioDispatcher){
-    var remindersList: LinkedHashMap<String, ReminderDTO> = LinkedHashMap()
-    private var shouldReturnError = false
+class RemindersLocalRepositoryTest{
+    private lateinit var localRepository : RemindersLocalRepository
+    private lateinit var reminderDao: RemindersDao
+    private lateinit var database: RemindersDatabase
 
-    fun setReturnError(value: Boolean){
-        shouldReturnError = value
+    @Before
+    fun init() {
+
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).allowMainThreadQueries().build()
+        reminderDao = database.reminderDao()
+        localRepository = RemindersLocalRepository(reminderDao)
+
     }
 
-    override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        if(shouldReturnError){
-            return Result.Error("Error in test")
+    @After
+    fun cleanUp()
+    {
+        database.close()
+    }
+
+    @Test
+    fun saveReminders_getRemindersInLocalRepository() = runBlocking {
+        // GIVEN - list of reminders
+        val reminders = listOf(
+            ReminderDTO("TITLE1", "DESCRIPTION1", "LOCATION1", 1.1, 0.0),
+            ReminderDTO("TITLE2", "DESCRIPTION2", "LOCATION2", 1.1, 0.0)
+        )
+
+        // WHEN - Save in local repository
+        reminders.forEach{
+            localRepository.saveReminder(it)
         }
-        return Result.Success(remindersList.values.toList())
-    }
 
-    override suspend fun deleteAllReminders() {
-        remindersList.clear()
-    }
-
-    override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        if(shouldReturnError){
-            return Result.Error("Error in test")
-        }
-        remindersList[id]?.let{
-            return Result.Success(it)
-        }
-        return Result.Error("Reminder not found")
-    }
-
-    override suspend fun saveReminder(reminder: ReminderDTO) {
-        remindersList[reminder.id] = reminder
+        // THEN - local repository return our list
+        val loaded = localRepository.getReminders() as Result.Success
+        assertThat(loaded.data, `is`(reminders))
     }
 
 
+    @Test
+    fun saveReminder_getReminderById() = runBlocking {
+        // GIVEN - list of reminders
+        val reminder = ReminderDTO("TITLE1", "DESCRIPTION1", "LOCATION1", 1.1, 0.0, "id1")
+
+        // WHEN - Save in local repository
+
+        localRepository.saveReminder(reminder)
+
+        // THEN - local repository return our list
+        val loaded = localRepository.getReminder("id1") as Result.Success
+        assertThat(loaded.data, `is`(reminder))
+    }
+
+
+    @Test
+    fun noReminders_getReminderByIdAndGetReminders_returnError() = runBlocking {
+        // GIVEN - fresh localRepository
+        localRepository.deleteAllReminders()
+
+        // WHEN - Save in local repository
+        val reminders = localRepository.getReminders() as Result.Success
+        val reminder = localRepository.getReminder("id") as Result.Error
+
+        // THEN - local repository return our list
+        assertThat(reminders.data, `is`(listOf()))
+        assertThat(reminder.message, `is`("Reminder not found!"))
+    }
 }

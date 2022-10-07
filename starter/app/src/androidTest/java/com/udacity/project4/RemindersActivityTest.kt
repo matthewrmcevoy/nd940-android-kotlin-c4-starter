@@ -6,8 +6,7 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -138,6 +137,24 @@ class RemindersActivityTest :
     }
 
     @Test
+    fun saveProperReminder_ShowsToast()= runBlocking{
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).perform(replaceText("Test3"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("Desc3"))
+        onView(withId(R.id.selectLocation)).perform(click())
+        delay(3000)
+        onView(withId(R.id.map)).perform(longClick())
+
+        onView(withId(R.id.save_loc_bttn)).perform(click())
+        onView(withId(R.id.saveReminder)).perform(click())
+        //CHECKS FOR TOAST FOR SUCCESSFUL COMPLETION
+        onView(withText(R.string.reminder_saved)).check(matches(isDisplayed()))
+    }
+
+    @Test
     fun saveProperReminder_isVisibleInListView()= runBlocking{
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
@@ -147,7 +164,7 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderDescription)).perform(replaceText("Desc3"))
         onView(withId(R.id.selectLocation)).perform(click())
         delay(3000)
-        onView(withId(R.id.map)).perform(click())
+        onView(withId(R.id.map)).perform(longClick())
 
         onView(withId(R.id.save_loc_bttn)).perform(click())
         onView(withId(R.id.saveReminder)).perform(click())

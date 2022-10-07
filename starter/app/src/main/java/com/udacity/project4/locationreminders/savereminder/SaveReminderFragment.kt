@@ -28,6 +28,7 @@ import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.lang.Exception
 
 const val ACTION_GEOFENCE_EVENT = "GEOFENCE_EVENT"
 private const val REQUEST_FOREGROUND_ONLY = 123
@@ -170,7 +171,7 @@ class SaveReminderFragment : BaseFragment() {
             if(exception is ResolvableApiException && resolve){
                 try{
                     activity?.let{
-                        exception.startResolutionForResult(it, REQUEST_LOCATION_ON)
+                        startIntentSenderForResult(exception.resolution.intentSender, REQUEST_LOCATION_ON, null, 0, 0,0, null)
                     }
                 }catch(sendEx: IntentSender.SendIntentException){
                     Log.i("SaveRemFrag","Could not resolve location settings " + sendEx.message)
@@ -220,6 +221,12 @@ class SaveReminderFragment : BaseFragment() {
                 _viewModel.onClear()
                 //_viewModel.navigationCommand.value=NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
             }
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_LOCATION_ON) {
+            checkLocationSettingsStartGeofence(false)
         }
     }
 
