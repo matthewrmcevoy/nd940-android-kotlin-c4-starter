@@ -5,7 +5,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,13 +19,13 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
-import com.udacity.project4.locationreminders.savereminder.selectreminderlocation.SelectLocationFragment
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
@@ -54,7 +56,7 @@ class SaveReminderFragment : BaseFragment() {
     ): View? {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_save_reminder, container, false)
-
+        Log.i("SaveRemFrag","runningQOrLater is $runningQOrLater")
         setDisplayHomeAsUpEnabled(true)
 
         binding.viewModel = _viewModel
@@ -100,6 +102,7 @@ class SaveReminderFragment : BaseFragment() {
     private fun foregroundAndBackgroundLocationsPermsApproved() : Boolean {
         //if running Q or later, require both foreground and background permissions
         return if(runningQOrLater) {
+            Log.i("saveRemFrag","require both permissions")
             (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -110,6 +113,7 @@ class SaveReminderFragment : BaseFragment() {
             ) == PackageManager.PERMISSION_GRANTED)
         // otherwise, only require foreground location
         }else{
+            Log.i("saveRemFrag","require only foreground permissions")
             ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -120,11 +124,32 @@ class SaveReminderFragment : BaseFragment() {
         if(foregroundAndBackgroundLocationsPermsApproved()){
             return
         }else if(runningQOrLater){
+            Log.i("saveRemFrag","requesting both permissions now")
             val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             requestPermissions(permissions, REQUEST_FOREBACK_PERM)
         }else{
             val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
             requestPermissions(permissions, REQUEST_FOREGROUND_ONLY)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if(grantResults.isEmpty() || grantResults[0] == PackageManager.PERMISSION_DENIED || (requestCode == REQUEST_FOREBACK_PERM && grantResults[1] == PackageManager.PERMISSION_DENIED))
+        {
+            Snackbar.make(this.requireView(),"You need to approve permissions for GEOFENCING to function", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Settings"){
+                    startActivity(Intent().apply{
+                        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                }.show()
+        }else {
+            checkLocationSettingsStartGeofence()
         }
     }
 
