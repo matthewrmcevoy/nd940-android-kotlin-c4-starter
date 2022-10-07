@@ -218,7 +218,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             _viewModel.latitude.value = poiMarker.position.latitude
             _viewModel.longitude.value = poiMarker.position.longitude
             findNavController().navigate(SelectLocationFragmentDirections.actionSelectLocationFragmentToSaveReminderFragment())
-        }else{
+        }else if(::marker.isInitialized){
+            savedLocation = marker.position
+            _viewModel.reminderSelectedLocationStr.value = marker.title
+            _viewModel.latitude.value = marker.position.latitude
+            _viewModel.longitude.value = marker.position.longitude
+            findNavController().navigate(SelectLocationFragmentDirections.actionSelectLocationFragmentToSaveReminderFragment())
+        }
+        else{
             Snackbar.make(this.requireView(),R.string.select_location, Snackbar.LENGTH_INDEFINITE).setAction(android.R.string.ok){
                 null
             }.show()
