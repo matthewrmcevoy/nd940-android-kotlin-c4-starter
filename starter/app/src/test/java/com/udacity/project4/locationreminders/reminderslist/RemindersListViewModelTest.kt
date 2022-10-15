@@ -48,7 +48,7 @@ class RemindersListViewModelTest {
     fun remindersNotFoundCallsError() = runBlockingTest{
         dataSource.setShouldReturnError(true)
         remindersListViewModel.loadReminders()
-        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`("no reminders found"))
+        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`("Test Exception encountered"))
     }
 
     @Test

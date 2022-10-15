@@ -40,6 +40,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
+import org.koin.test.KoinTest
 import org.koin.test.get
 
 @RunWith(AndroidJUnit4::class)
@@ -47,7 +48,7 @@ import org.koin.test.get
 @ExperimentalCoroutinesApi
 //END TO END test to black box test the app
 class RemindersActivityTest :
-    AutoCloseKoinTest() {// Extended Koin Test - embed autoclose @after method to close Koin after every test
+    KoinTest {// Extended Koin Test - embed autoclose @after method to close Koin after every test
 
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
@@ -106,10 +107,12 @@ class RemindersActivityTest :
 
     }
 
+
     @Test
-    fun noReminders_ShowsNoDataImage() = runBlocking{
-        repository.deleteAllReminders()
+    fun noReminders_ShowsNoDataImage()= runBlockingTest {
+        //repository.deleteAllReminders()
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
 
         activityScenario.close()
@@ -118,6 +121,7 @@ class RemindersActivityTest :
     @Test
     fun addReminder_NavigatesToSaveReminderFragment() = runBlocking {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
         onView(withId(R.id.addReminderFAB)).perform(click())
 
         //Check that a view of the Fragment we expect is displayed
